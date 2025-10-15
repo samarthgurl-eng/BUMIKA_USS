@@ -1,0 +1,615 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>GM University Coding Club</title>
+  <meta name="description" content="GM University Coding Club — events, registration, join, contact" />
+  <style>
+    /* ====== Variables & Reset ====== */
+    :root{
+      --bg:#0b0f14;
+      --panel:#0f1720;
+      --muted:#98a0b3;
+      --accent:#7c3aed; /* vibrant purple */
+      --accent-2:#06b6d4; /* cyan */
+      --glass: rgba(255,255,255,0.04);
+      --glass-2: rgba(255,255,255,0.02);
+      --neon: 0 0 18px rgba(124,58,237,0.55);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background: radial-gradient(1200px 600px at 10% 10%, rgba(124,58,237,0.06), transparent),
+                  radial-gradient(1000px 500px at 90% 90%, rgba(6,182,212,0.04), transparent),
+                  var(--bg);
+      color:#e6eef7;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      overflow-x:hidden;
+    }
+
+    /* ====== LAYOUT ====== */
+    header{
+      position:sticky;top:0;z-index:60;
+      backdrop-filter: blur(6px);
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.00));
+      border-bottom:1px solid rgba(255,255,255,0.03);
+      padding:18px 28px;
+      display:flex;align-items:center;gap:18px;
+    }
+    .logo{
+      display:flex;align-items:center;gap:12px;font-weight:700;font-size:18px;
+      letter-spacing:0.6px
+    }
+    .logo .mark{
+      width:46px;height:46px;border-radius:10px;display:grid;place-items:center;
+      background: linear-gradient(135deg,var(--accent),var(--accent-2));
+      box-shadow: var(--neon);
+      transform:rotate(-8deg);
+    }
+    nav{margin-left:auto;display:flex;gap:12px;align-items:center}
+    nav a{color:var(--muted);text-decoration:none;padding:8px 12px;border-radius:8px;transition:all .22s}
+    nav a:hover{color:#fff;background:rgba(255,255,255,0.02)}
+    .cta{background:linear-gradient(90deg,var(--accent),var(--accent-2));padding:8px 14px;border-radius:10px;color:#061019;font-weight:700}
+
+    main{padding:36px 6vw 80px}
+    .hero{
+      display:grid;grid-template-columns:1fr 460px;gap:30px;align-items:center;margin-bottom:34px
+    }
+    .card{background:linear-gradient(180deg,var(--glass),transparent);border:1px solid rgba(255,255,255,0.04);padding:20px;border-radius:14px}
+
+    .hero .left h1{font-size:36px;margin:0 0 8px}
+    .hero .left p{color:var(--muted);margin:0 0 18px}
+    .badges{display:flex;gap:10px;flex-wrap:wrap}
+    .badge{padding:8px 12px;border-radius:999px;background:linear-gradient(90deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.02);font-weight:600;color:var(--muted)}
+
+    .stats{display:flex;gap:18px;margin-top:16px}
+    .stat{padding:12px;border-radius:12px;background:linear-gradient(180deg,var(--glass-2),transparent);flex:1;text-align:center}
+    .stat h3{margin:0;font-size:20px}
+    .stat p{margin:6px 0 0;color:var(--muted);font-size:13px}
+
+    /* ====== EVENTS GRID ====== */
+    .events{margin-top:30px}
+    .events-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
+    .event-card{overflow:hidden;position:relative;border-radius:14px;min-height:320px;display:flex;flex-direction:column}
+    .event-card .media{height:160px;background-size:cover;background-position:center;border-bottom:1px solid rgba(0,0,0,0.35)}
+    .event-body{padding:16px;background:linear-gradient(180deg,transparent,var(--panel));flex:1;display:flex;flex-direction:column;gap:8px}
+    .event-body h4{margin:0}
+    .event-meta{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:13px}
+    .event-actions{display:flex;gap:10px;margin-top:auto}
+    .btn{padding:9px 12px;border-radius:10px;border:none;cursor:pointer;font-weight:700}
+    .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
+    .btn.primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#031018;box-shadow:0 8px 24px rgba(6,182,212,0.06)}
+
+    /* ====== SIDEBAR ====== */
+    .sidebar{position:relative}
+    .search{display:flex;gap:8px;margin-bottom:14px}
+    .search input{flex:1;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit}
+
+    .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+    .pill{padding:8px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:var(--muted);cursor:pointer}
+    .pill.active{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#031018}
+
+    /* ====== MODAL ====== */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(2,6,23,0.6);display:none;place-items:center;z-index:80}
+    .modal{width:720px;max-width:94%;border-radius:14px;padding:18px;background:linear-gradient(180deg,var(--panel),rgba(255,255,255,0.01));box-shadow:0 20px 60px rgba(2,6,23,0.7)}
+    .modal .row{display:flex;gap:12px}
+    .modal form{display:flex;flex-direction:column;gap:10px}
+    .field{display:flex;flex-direction:column}
+    input,textarea,select{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+    .small{font-size:13px;color:var(--muted)}
+
+    /* ====== FOOTER ====== */
+    footer{margin-top:44px;padding:26px;border-top:1px solid rgba(255,255,255,0.03);display:flex;justify-content:space-between;gap:20px}
+
+    /* ====== Animations & Microinteractions ====== */
+    .glow{box-shadow:0 6px 30px rgba(124,58,237,0.14)}
+    .pulse{animation:pulse 2.6s infinite}
+    @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.018)}100%{transform:scale(1)}}
+
+    .tilt{transform:perspective(800px) rotateX(2deg) rotateY(-6deg)}
+
+    /* ====== Responsive ====== */
+    @media (max-width:900px){
+      .hero{grid-template-columns:1fr}
+      nav{display:none}
+    }
+
+    /* ====== Fancy floating shapes (pure CSS) ====== */
+    .float-shape{position:fixed;border-radius:20px;filter:blur(26px);opacity:.16;z-index:0}
+    .s1{width:360px;height:200px;left:-80px;top:20vh;background:linear-gradient(90deg,var(--accent),transparent)}
+    .s2{width:420px;height:260px;right:-100px;bottom:10vh;background:linear-gradient(90deg,var(--accent-2),transparent)}
+
+    /* ====== Accessibility hints ====== */
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+    /* ====== Fancy timeline for events detail page ====== */
+    .timeline{border-left:2px dashed rgba(255,255,255,0.03);padding-left:12px}
+    .timeline-item{position:relative;padding:12px 0}
+    .timeline-item:before{content:'';position:absolute;left:-11px;top:14px;width:16px;height:16px;border-radius:50%;background:linear-gradient(90deg,var(--accent),var(--accent-2));box-shadow:var(--neon)}
+
+    /* ====== Tiny utilities ====== */
+    .muted{color:var(--muted)}
+    .center{display:grid;place-items:center}
+  </style>
+</head>
+<body>
+  <div class="float-shape s1" aria-hidden></div>
+  <div class="float-shape s2" aria-hidden></div>
+
+  <header>
+    <div class="logo" aria-label="GM University Coding Club logo">
+      <div class="mark" title="GMUCC">GM</div>
+      <div>
+        <div style="font-size:12px;opacity:.9">GM University</div>
+        <div style="font-size:14px">Coding Club</div>
+      </div>
+    </div>
+
+    <nav aria-label="Main navigation">
+      <a href="#events">Events</a>
+      <a href="#join">Join</a>
+      <a href="#resources">Resources</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="left card tilt">
+        <h1>GM University Coding Club</h1>
+        <p>We learn by building — hack nights, workshops, competitions and open-source projects. Neon vibes, real skills.</p>
+
+        <div class="badges">
+          <div class="badge">Open to all years</div>
+          <div class="badge">Free membership</div>
+          <div class="badge">Workshops & Mentorship</div>
+        </div>
+
+        <div class="stats">
+          <div class="stat">
+            <h3 id="membersCount">1,024+</h3>
+            <p>Active members</p>
+          </div>
+          <div class="stat">
+            <h3 id="eventsCount">28</h3>
+            <p>Events this year</p>
+          </div>
+          <div class="stat">
+            <h3 id="projectsCount">56</h3>
+            <p>Open projects</p>
+          </div>
+        </div>
+      </div>
+
+      <aside class="sidebar card">
+        <div class="search">
+          <input id="search" placeholder="Search events, workshops, hackathons..." aria-label="Search events" />
+          <button class="btn ghost" id="searchBtn">Search</button>
+        </div>
+
+        <div class="filters">
+          <button class="pill active" data-filter="all">All</button>
+          <button class="pill" data-filter="workshop">Workshop</button>
+          <button class="pill" data-filter="competition">Competition</button>
+          <button class="pill" data-filter="meetup">Meetup</button>
+        </div>
+
+        <h4 style="margin:6px 0 8px">Quick Links</h4>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <a class="card" href="#resources">Learning Resources</a>
+          <a class="card" href="#projects">Open Source Projects</a>
+          <a class="card" href="#volunteer">Volunteer Mentors</a>
+        </div>
+      </aside>
+    </section>
+
+    <!-- EVENTS -->
+    <section id="events" class="events">
+      <h2>Upcoming Events</h2>
+      <p class="muted">Explore what’s coming — register to save your seat. All registrations are stored locally (demo).</p>
+
+      <div style="margin-top:14px;display:flex;gap:18px;align-items:center;justify-content:space-between;flex-wrap:wrap">
+        <div style="display:flex;gap:8px;align-items:center">
+          <label class="small">Sort</label>
+          <select id="sortSelect">
+            <option value="soon">Soonest</option>
+            <option value="popular">Most Popular</option>
+            <option value="new">Newest</option>
+          </select>
+        </div>
+
+        <div style="display:flex;gap:8px;align-items:center">
+          <label class="small">View</label>
+          <button class="pill" id="gridView">Grid</button>
+          <button class="pill" id="listView">List</button>
+        </div>
+      </div>
+
+      <div class="events-grid" id="eventsGrid" style="margin-top:18px">
+        <!-- Event cards injected by JS -->
+      </div>
+
+      <div style="margin-top:18px;display:flex;gap:8px;align-items:center">
+        <button class="pill" id="loadMore">Load more events</button>
+        <div class="small muted">Tip: Use search and filters to find events quickly.</div>
+      </div>
+    </section>
+
+    <!-- JOIN -->
+    <section id="join" style="margin-top:30px;display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start">
+      <div class="card">
+        <h2>Join the Club</h2>
+        <p class="muted">Fill the quick form to join — we’ll add you to the WhatsApp group and mailing list.</p>
+
+        <form id="joinForm" class="join-form" onsubmit="return false;" style="margin-top:12px">
+          <div class="field">
+            <label class="small">Full name</label>
+            <input id="jName" required />
+          </div>
+          <div class="field">
+            <label class="small">Email</label>
+            <input id="jEmail" type="email" required />
+          </div>
+          <div class="field">
+            <label class="small">Student ID & Course</label>
+            <input id="jRoll" placeholder="U23E01CS037 - CSE" />
+          </div>
+          <div class="field">
+            <label class="small">Why do you want to join? <span class="small muted">(a short line)</span></label>
+            <input id="jWhy" maxlength="120" />
+          </div>
+          <div class="small muted" style="margin-top:8px">By joining you agree to club code of conduct.</div>
+        </form>
+      </div>
+
+      <aside class="card">
+        <h3>Contact & Office Hours</h3>
+        <p class="muted">Club Secretary: <strong>Mohammad Junaid</strong></p>
+        <p class="muted">Email: <a href="mailto:gmucoding@university.edu">gmucoding@university.edu</a></p>
+        <p class="muted">Phone: +91 98765 43210</p>
+        <div style="margin-top:10px">
+          <h4>Office Hours</h4>
+          <div class="timeline">
+            <div class="timeline-item"><strong>Mon & Wed</strong><div class="small muted">5pm — 7pm | Lab 3, CS Block</div></div>
+            <div class="timeline-item"><strong>Fri</strong><div class="small muted">4pm — 6pm | Online</div></div>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <!-- RESOURCES & PROJECTS -->
+    <section id="resources" style="margin-top:30px">
+      <h2>Resources & Open Projects</h2>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+        <div class="card">
+          <h4>Weekly Workshops</h4>
+          <ul class="small muted">
+            <li>Intro to Git & GitHub</li>
+            <li>Web Dev: HTML/CSS/JS deep-dive</li>
+            <li>Data Structures with Python</li>
+            <li>Machine Learning Basics</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>Open Projects</h4>
+          <ul class="small muted">
+            <li>Campus Events Dashboard (React)</li>
+            <li>Question Bank Web App (Django)</li>
+            <li>Accessibility Audit Tool (Vanilla JS)</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section id="contact" style="margin-top:30px">
+      <h2>Contact Us</h2>
+      <div style="display:grid;grid-template-columns:1fr 340px;gap:12px;margin-top:12px">
+        <div class="card">
+          <form id="contactForm" onsubmit="return false;">
+            <div class="field">
+              <label class="small">Your name</label>
+              <input id="cName" required />
+            </div>
+            <div class="field">
+              <label class="small">Email</label>
+              <input id="cEmail" type="email" required />
+            </div>
+            <div class="field">
+              <label class="small">Message</label>
+              <textarea id="cMsg" rows="5" required></textarea>
+            </div>
+            <div class="small muted" style="margin-top:8px">We’ll reply within 3 business days.</div>
+          </form>
+        </div>
+
+        <aside class="card">
+          <h4>Follow</h4>
+          <p class="muted">Stay updated via:</p>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <a class="pill" href="#">Instagram</a>
+            <a class="pill" href="#">LinkedIn</a>
+            <a class="pill" href="#">YouTube</a>
+          </div>
+
+          <div style="margin-top:12px">
+            <h4>Location</h4>
+            <div class="small muted">GM University - Computer Science Block, Main Campus</div>
+            <div style="height:120px;margin-top:8px;background:rgba(255,255,255,0.02);border-radius:8px;display:grid;place-items:center">Map placeholder</div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <div>
+      <strong>GM University Coding Club</strong>
+      <div class="small muted">© <span id="year"></span> GM University</div>
+    </div>
+    <div class="small muted">Built with ❤️ by club devs · Last updated: <span id="lastUpdated"></span></div>
+  </footer>
+
+  <script>
+    // ====== Demo data set for events ======
+    const demoEvents = [
+      {
+        id: 'E001',
+        title: 'Intro to Web: HTML & CSS Workshop',
+        date: '2025-11-02',
+        type: 'workshop',
+        seats: 40,
+        img: 'https://images.unsplash.com/photo-1526378727250-5f83c4d9a6d4?auto=format&fit=crop&w=1000&q=60',
+        desc: 'Beginner friendly workshop covering modern HTML & CSS, responsive layouts, and best practices.'
+      },
+      {
+        id: 'E002',
+        title: 'Inter-College Hackathon',
+        date: '2025-12-06',
+        type: 'competition',
+        seats: 120,
+        img: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1000&q=60',
+        desc: '24-hour hackathon open to all colleges. Prizes, mentorship, and networking.'
+      },
+      {
+        id: 'E003',
+        title: 'AI & Ethics Panel Discussion',
+        date: '2025-10-29',
+        type: 'meetup',
+        seats: 60,
+        img: 'https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=1000&q=60',
+        desc: 'A moderated panel exploring ethical challenges in AI research and deployment.'
+      },
+      {
+        id: 'E004',
+        title: 'DSA: From Zero to Hero',
+        date: '2025-11-16',
+        type: 'workshop',
+        seats: 50,
+        img: 'https://images.unsplash.com/photo-1587620962725-abab7fe55159?auto=format&fit=crop&w=1000&q=60',
+        desc: 'Structured data structures and algorithms bootcamp with hands-on problems.'
+      }
+    ];
+
+    // ====== Local state & helpers ======
+    let events = [...demoEvents];
+    const registrationsKey = 'gmucc_registrations_v1';
+    const membersKey = 'gmucc_members_v1';
+
+    function $(sel){return document.querySelector(sel)}
+    function $all(sel){return Array.from(document.querySelectorAll(sel))}
+
+    // Render events to grid
+    function renderEvents(list){
+      const grid = $('#eventsGrid');
+      grid.innerHTML='';
+      list.forEach(ev=>{
+        const card = document.createElement('article');
+        card.className='event-card card glow';
+        card.innerHTML = `
+          <div class="media" style="background-image:url('${ev.img}')" role="img" aria-label="${ev.title}"></div>
+          <div class="event-body">
+            <h4>${ev.title}</h4>
+            <div class="event-meta"><div>${formatDate(ev.date)}</div><div>${ev.type}</div></div>
+            <p class="muted" style="margin:8px 0 0">${ev.desc}</p>
+            <div class="event-actions">
+              <button class="btn primary" data-action="register" data-id="${ev.id}">Register</button>
+              <button class="btn ghost" data-action="details" data-id="${ev.id}">Details</button>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    // Format date
+    function formatDate(d){
+      try{ const dd = new Date(d+'T00:00:00'); return dd.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}catch(e){return d}
+    }
+
+    // Open modal & populate
+    function openModal(eventId){
+      const ev = events.find(x=>x.id===eventId);
+      if(!ev) return;
+      $('#modalImage').style.backgroundImage = `url('${ev.img}')`;
+      $('#modalDesc').textContent = ev.desc;
+      $('#modalDate').textContent = formatDate(ev.date);
+      $('#modalBackdrop').style.display='grid';
+      $('#modalBackdrop').setAttribute('aria-hidden','false');
+      $('#modalBackdrop').dataset.eid = ev.id;
+      // prefill if member info exists
+      const mem = loadMembers();
+      if(mem.length){
+        $('#rName').value = mem[0].name || '';
+        $('#rEmail').value = mem[0].email || '';
+        $('#rDept').value = mem[0].dept || '';
+      }
+      $('#rName').focus();
+    }
+
+    function closeModal(){
+      $('#modalBackdrop').style.display='none';
+      $('#modalBackdrop').setAttribute('aria-hidden','true');
+      $('#regForm').reset();
+    }
+
+    // Save registration to localStorage
+    function saveRegistration(evId, payload){
+      const all = JSON.parse(localStorage.getItem(registrationsKey) || '[]');
+      all.push({eventId:evId,ts: new Date().toISOString(), ...payload});
+      localStorage.setItem(registrationsKey, JSON.stringify(all));
+      return all;
+    }
+
+    function loadRegistrations(){
+      return JSON.parse(localStorage.getItem(registrationsKey) || '[]');
+    }
+
+    // Members store for quick join
+    function saveMember(payload){
+      const all = JSON.parse(localStorage.getItem(membersKey) || '[]');
+      all.unshift({...payload,ts:new Date().toISOString()});
+      localStorage.setItem(membersKey, JSON.stringify(all.slice(0,40)));
+      return all;
+    }
+    function loadMembers(){return JSON.parse(localStorage.getItem(membersKey) || '[]')}
+
+    // ====== Event handlers wiring ======
+    document.addEventListener('click', (e)=>{
+      const a = e.target.closest('[data-action]');
+      if(a){
+        const action = a.dataset.action, id = a.dataset.id;
+        if(action==='register') openModal(id);
+        if(action==='details') alert('Event details:\n'+JSON.stringify(events.find(x=>x.id===id),null,2));
+      }
+    });
+
+    $('#modalClose').addEventListener('click', closeModal);
+    $('#regCancel').addEventListener('click',(e)=>{e.preventDefault();closeModal();});
+
+    // Submit registration
+    $('#regSubmit').addEventListener('click',(e)=>{
+      e.preventDefault();
+      const eid = $('#modalBackdrop').dataset.eid;
+      const payload = {name:$('#rName').value, email:$('#rEmail').value, dept:$('#rDept').value};
+      if(!payload.name||!payload.email){alert('Please enter name and email');return}
+      const all = saveRegistration(eid,payload);
+      // auto-save as member
+      saveMember({name:payload.name,email:payload.email,dept:payload.dept});
+      alert('Registered! See confirmation in console (demo). Total regs: '+all.length);
+      console.log('Registrations:', all);
+      closeModal();
+      updateCounts();
+    });
+
+    // Join form
+    $('#joinSubmit').addEventListener('click',(e)=>{
+      e.preventDefault();
+      const p={name:$('#jName').value,email:$('#jEmail').value,dept:$('#jRoll').value,why:$('#jWhy').value};
+      if(!p.name||!p.email){alert('Name and email required');return}
+      saveMember(p);
+      alert('Thanks for joining! You'll receive an invite soon. (demo)');
+      $('#joinForm').reset();
+      updateCounts();
+    });
+    $('#joinClear').addEventListener('click',(e)=>{e.preventDefault();$('#joinForm').reset()});
+
+    // Contact form handler
+    $('#cSend').addEventListener('click',(e)=>{
+      e.preventDefault();
+      const msg = {name:$('#cName').value,email:$('#cEmail').value, msg:$('#cMsg').value};
+      if(!msg.name||!msg.email||!msg.msg){alert('Please fill all fields');return}
+      // Demo: store in localStorage under registrationsKey as 'inbox' (not ideal, demo only)
+      const inbox = JSON.parse(localStorage.getItem('gmucc_inbox_v1')||'[]');
+      inbox.unshift({...msg,ts:new Date().toISOString()});
+      localStorage.setItem('gmucc_inbox_v1',JSON.stringify(inbox));
+      alert('Message sent (local demo). We will reply soon.');
+      $('#contactForm').reset();
+    });
+
+    // Search & filters
+    $('#searchBtn').addEventListener('click',()=>applyFilters());
+    $('#search').addEventListener('keyup',(e)=>{ if(e.key==='Enter') applyFilters(); });
+
+    $all('.pill').forEach(p=>p.addEventListener('click',(ev)=>{
+      $all('.pill').forEach(x=>x.classList.remove('active'));
+      ev.currentTarget.classList.add('active');
+      applyFilters();
+    }));
+
+    $('#sortSelect').addEventListener('change',applyFilters);
+    $('#gridView').addEventListener('click',()=>{ $('#eventsGrid').style.gridTemplateColumns='repeat(auto-fit,minmax(260px,1fr))' });
+    $('#listView').addEventListener('click',()=>{ $('#eventsGrid').style.gridTemplateColumns='1fr' });
+
+    $('#loadMore').addEventListener('click',()=>{
+      // demo: clone demoEvents and give new ids
+      const more = demoEvents.map((d,i)=>({...d,id:d.id+'m'+Math.floor(Math.random()*1000)}));
+      events = events.concat(more);
+      renderEvents(events);
+    });
+
+    // Open registration from hero
+    $('#openRegister').addEventListener('click',()=>{ if(events.length) openModal(events[0].id) });
+    $('#openJoin').addEventListener('click',()=>{ location.hash='#join'; $('#jName').focus(); });
+
+    // Modal close on backdrop click
+    $('#modalBackdrop').addEventListener('click',(e)=>{ if(e.target.id==='modalBackdrop') closeModal(); });
+
+    // Sort/filter logic
+    function applyFilters(){
+      const q = $('#search').value.trim().toLowerCase();
+      const active = $all('.pill').find(x=>x.classList.contains('active'))?.dataset.filter || 'all';
+      let filtered = events.filter(ev=>{
+        const matchesQuery = !q || ev.title.toLowerCase().includes(q) || ev.desc.toLowerCase().includes(q);
+        const matchesFilter = active==='all' || ev.type===active;
+        return matchesQuery && matchesFilter;
+      });
+      const sort = $('#sortSelect').value;
+      if(sort==='soon') filtered.sort((a,b)=>new Date(a.date) - new Date(b.date));
+      if(sort==='popular') filtered.sort((a,b)=>b.seats - a.seats);
+      if(sort==='new') filtered = filtered.reverse();
+      renderEvents(filtered);
+    }
+
+    // Update counts based on localStorage
+    function updateCounts(){
+      const mem = loadMembers();
+      const regs = loadRegistrations();
+      $('#membersCount').textContent = (1000 + mem.length) + '+'; // seeded
+      $('#eventsCount').textContent = events.length;
+      $('#projectsCount').textContent = 56;
+      console.log('Members:',mem.length,'Registrations:',regs.length);
+    }
+
+    // Initial render
+    (function init(){
+      document.getElementById('year').textContent = new Date().getFullYear();
+      document.getElementById('lastUpdated').textContent = new Date().toLocaleDateString();
+      renderEvents(events);
+      updateCounts();
+    })();
+
+    // ====== Accessibility: keyboard close for modal ======
+    document.addEventListener('keydown', (e)=>{
+      if(e.key==='Escape') closeModal();
+    });
+
+    // ====== Tiny easter-egg: secret admin export ======
+    let secret = '';
+    window.addEventListener('keydown', (e)=>{ secret+=e.key; if(secret.endsWith('export')){
+      const regs = loadRegistrations();
+      const blob = new Blob([JSON.stringify(regs,null,2)],{type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download='gmucc_registrations.json'; a.click();
+      URL.revokeObjectURL(url);
+      secret = '';
+    } if(secret.length>20) secret=secret.slice(-20); });
+
+  </script>
+</body>
+</html>
